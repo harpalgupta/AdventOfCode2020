@@ -9,13 +9,17 @@ try {
 
 let regex = /^(\d+)-(\d+) ([a-z]): (\w+)/;
 
-var validPassword = 0;
+let validPasswordPart1 = 0;
+let validPasswordPart2 =0
+
 
 input.forEach((line) => {
   let matches = line.match(regex);
 
   let atLeast = matches[1];
   let atMost = matches[2];
+
+  
 
   let letter = matches[3];
 
@@ -30,12 +34,38 @@ input.forEach((line) => {
   });
 
   if (occurances >= atLeast && occurances <= atMost) {
-    validPassword++;
+    validPasswordPart1++;
     console.log(
       `good password at least ${atLeast} at most ${atMost} for letter ${letter} count: ${occurances} password: ${password} `
     );
-  } else {
+  } 
+
+  var part2Matches= 0;
+  let firstPosition = matches[1]-1;
+  let secondPosition = matches[2]-1;
+
+  if(password[firstPosition]===letter){
+    part2Matches++
+
   }
+  if(password[secondPosition]===letter){
+    part2Matches++
+
+  }
+
+  if(part2Matches===1){
+
+    validPasswordPart2++
+
+  }
+
+
+
 });
 
-console.log("valid Passwords", validPassword);
+
+
+
+console.log("valid Passwords part1", validPasswordPart1);
+console.log("valid Passwords part2", validPasswordPart2);
+
