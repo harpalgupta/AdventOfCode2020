@@ -1,50 +1,74 @@
 let input = [];
+var os = require('os');
+
 
 const fs = require("fs");
 try {
-  input = fs.readFileSync("./day4Input.txt", "utf8").split("\n\n");
+  input = fs.readFileSync("./day5Input.txt", "utf8").split(os.EOL);
 } catch (err) {
   console.error(err);
 }
 
 
-
-// For example, consider just the first seven characters of FBFBBFFRLR:
-
-// Start by considering the whole range, rows 0 through 127.
-// F means to take the lower half, keeping rows 0 through 63.
-// B means to take the upper half, keeping rows 32 through 63.
-// F means to take the lower half, keeping rows 32 through 47.
-// B means to take the upper half, keeping rows 40 through 47.
-// B keeps rows 44 through 47.
-// F keeps rows 44 through 45.
-// The final F keeps the lower of the two, row 44.
-
-// The last three characters will be either L or R; these specify exactly one of the 8 columns of seats on the plane (numbered 0 through 7). The same process as above proceeds again, this time with only three steps. L means to keep the lower half, while R means to keep the upper half.
-
-// For example, consider just the last 3 characters of FBFBBFFRLR:
-// BFFFBBFRRR: row 70, column 7, seat ID 567.
-// FFFBBBFRRR: row 14, column 7, seat ID 119.
-// BBFFBBFRLL: row 102, column 4, seat ID 820.
-
-const FBProcess =(input,start,end)=>{
-  let midpoint = end/2;
-  if(input==="F"){
-    let something = Math.floor(end-(end-start)/2);
-    console.log(something);
-    return {"start": start,"end": something}
-
+const FBProcess = (input, start, end) => {
+  let midpoint = end / 2;
+  if (input === "F" || input === "L") {
+    let something = Math.floor(end - (end - start) / 2);
+    // console.log(something);
+    return { start: start, end: something };
+  } else if (input === "B" || input === "R") {
+    let something = (end + 1 - start) / 2;
+    // console.log(something);
+    return { start: Math.ceil(end + 1 - something), end: end };
   }
-  else if(input==="B"){
-    let something = (end+1-start)/2;
-    console.log(something);
-    return {"start": Math.ceil(end+1-something),"end": end}
+};
+var temp = "BBFFBBFRLL".split("");
 
+const processBoardingPass = (boardingPass) => {
+
+  var firstSection = boardingPass.splice(0, 6);
+  var secondSection = boardingPass;
+
+  let currentStart = 0;
+  let currentEnd = 127;
+
+  firstSection.forEach(letter => {
+    var result = FBProcess(letter, currentStart, currentEnd);
+    currentStart = result.start;
+    currentEnd = result.end;
+  });
+
+  let row = 0;
+  secondSectionLetter = secondSection[0];
+  let secondOther = secondSection.splice(1, 3);
+
+  if (secondSectionLetter === "F") {
+    row = currentEnd < currentStart ? currentEnd : currentStart;
+  } else if (secondSectionLetter === "B") {
+    row = currentEnd > currentStart ? currentEnd : currentStart;
   }
-}
 
-var result = FBProcess("F",0,128)
+  currentStart = 0;
+  currentEnd = 7;
 
-console.log(FBProcess("F",0,127));
- console.log(FBProcess("B",0,63));
-console.log(FBProcess("B",32,47));
+  secondOther.forEach((letter) => {
+    var result = FBProcess(letter, currentStart, currentEnd);
+    currentStart = result.start;
+    currentEnd = result.end;
+  });
+
+
+  return { column: currentEnd, seatId: row * 8 + currentEnd };
+};
+
+let currentHighestSeatId =0;
+
+input.forEach(boardingPass => {
+  let {seatId}= processBoardingPass(boardingPass.split(""));
+  if (seatId>currentHighestSeatId){
+    currentHighestSeatId = seatId
+  };
+  
+});
+
+console.log(`highest seat Id ${currentHighestSeatId}`);
